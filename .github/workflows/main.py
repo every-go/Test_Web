@@ -8,6 +8,26 @@ import shutil
 import subprocess
 import sys
 
+def cleanup_source_pdf():
+    """
+    Rimuove tutti i file PDF dalla cartella src e sottocartelle
+    """
+    print("\n=== CLEANING SOURCE DIRECTORY ===")
+    pdf_files_removed = 0
+    
+    for root, dirs, files in os.walk("src"):
+        for file in files:
+            if file.endswith(".pdf"):
+                pdf_path = os.path.join(root, file)
+                try:
+                    os.remove(pdf_path)
+                    print(f"✓ Removed PDF from source: {pdf_path}")
+                    pdf_files_removed += 1
+                except Exception as e:
+                    print(f"✗ Error removing {pdf_path}: {e}")
+    
+    print(f"Removed {pdf_files_removed} PDF files from source directory")
+
 def compile_tex_to_pdf():
     print("=== STARTING COMPILATION ===")
     print("Current working directory:", os.getcwd())
@@ -63,7 +83,7 @@ def compile_tex_to_pdf():
             
             print(f"Compilation return code: {result.returncode}")
             if result.stdout:
-                print("STDOUT:", result.stdout[-1000:])  # Ultimi 1000 caratteri
+                print("STDOUT:", result.stdout[-1000:])
             if result.stderr:
                 print("STDERR:", result.stderr[-1000:])
             
@@ -89,7 +109,6 @@ def compile_tex_to_pdf():
                     success_count += 1
                 else:
                     print(f"✗ PDF not found at: {pdf_path}")
-                    # List files in the directory to see what was created
                     print(f"Files in {tex_dir}:")
                     for f in os.listdir(tex_dir):
                         print(f"  - {f}")
@@ -101,27 +120,9 @@ def compile_tex_to_pdf():
     
     print(f"\n=== COMPILATION SUMMARY ===")
     print(f"Successfully compiled: {success_count}/{len(tex_files)} files")
-
-def cleanup_source_pdf():
-    """
-    Rimuove tutti i file PDF dalla cartella src e sottocartelle
-    """
-    print("\n=== CLEANING SOURCE DIRECTORY ===")
-    pdf_files_removed = 0
     
-    for root, dirs, files in os.walk("src"):
-        for file in files:
-            if file.endswith(".pdf"):
-                pdf_path = os.path.join(root, file)
-                try:
-                    os.remove(pdf_path)
-                    print(f"✓ Removed PDF from source: {pdf_path}")
-                    pdf_files_removed += 1
-                except Exception as e:
-                    print(f"✗ Error removing {pdf_path}: {e}")
-    
-    print(f"Removed {pdf_files_removed} PDF files from source directory")
+    # PULISCI SOLO DOPO AVER COPIATO TUTTI I PDF
+    cleanup_source_pdf()
 
 if __name__ == "__main__":
     compile_tex_to_pdf()
-    cleanup_source_pdf()

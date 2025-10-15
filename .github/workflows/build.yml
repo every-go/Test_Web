@@ -24,11 +24,9 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y \
           latexmk \
-          texlive-latex-base \
+          texlive \
           texlive-latex-extra \
-          texlive-fonts-recommended \
-          texlive-lang-italian \
-          texlive-science
+          texlive-lang-italian
 
       - name: Debug file structure
         run: |
