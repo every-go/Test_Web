@@ -24,12 +24,28 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y \
           latexmk \
-          texlive \
+          texlive-latex-base \
           texlive-latex-extra \
-          texlive-lang-italian
+          texlive-fonts-recommended \
+          texlive-lang-italian \
+          texlive-science
+
+      - name: Debug file structure
+        run: |
+          echo "=== File structure ==="
+          find . -name "*.tex" -o -name "*.py" | head -20
+          echo "=== src contents ==="
+          ls -la src/Candidatura/
 
       - name: Run main.py script
-        run: python .github/workflows/main.py
+        run: |
+          python .github/workflows/main.py
+
+      - name: Check if output was created
+        run: |
+          echo "=== Checking output ==="
+          find . -name "*.pdf" | head -10
+          ls -la output/ 2>/dev/null || echo "Output folder not found"
 
       - name: Add, commit and push changes
         run: |
