@@ -102,5 +102,26 @@ def compile_tex_to_pdf():
     print(f"\n=== COMPILATION SUMMARY ===")
     print(f"Successfully compiled: {success_count}/{len(tex_files)} files")
 
+def cleanup_source_pdf():
+    """
+    Rimuove tutti i file PDF dalla cartella src e sottocartelle
+    """
+    print("\n=== CLEANING SOURCE DIRECTORY ===")
+    pdf_files_removed = 0
+    
+    for root, dirs, files in os.walk("src"):
+        for file in files:
+            if file.endswith(".pdf"):
+                pdf_path = os.path.join(root, file)
+                try:
+                    os.remove(pdf_path)
+                    print(f"✓ Removed PDF from source: {pdf_path}")
+                    pdf_files_removed += 1
+                except Exception as e:
+                    print(f"✗ Error removing {pdf_path}: {e}")
+    
+    print(f"Removed {pdf_files_removed} PDF files from source directory")
+
 if __name__ == "__main__":
     compile_tex_to_pdf()
+    cleanup_source_pdf()
