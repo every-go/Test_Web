@@ -218,3 +218,33 @@ a:hover {
         min-height: 50vh;
     }
 }
+
+.github-member {
+  margin: 10px 0;
+}
+
+.github-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  gap: 10px;
+  padding: 5px;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.github-link:hover {
+  background-color: #f0f0f0;
+}
+
+.github-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+}
+
+.github-name {
+  font-weight: 500;
+}

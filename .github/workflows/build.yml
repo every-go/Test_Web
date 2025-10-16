@@ -1,4 +1,4 @@
-name: Compile and Update Website
+name: Compile Latex and create output
 
 on:
   push:
