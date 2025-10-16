@@ -1,130 +1,187 @@
-#!/usr/bin/env python3
-"""
-Script semplificato per compilare i file .tex in .pdf
-"""
+import os
+import re
+import shutil
+import subprocess
+from pathlib import Path
+from datetime import datetime
+
+INDEX_HTML_PATH = Path("index.html")
+SRC_DIR = Path("src")
+OUTPUT_DIR = Path("output")
+SECTION_ORDER = ["RTB", "PB", "Candidatura", "Diario Di Bordo"]
+MAX_DEPTH = 3  # maximum heading depth for HTML
+
+MONTH_IT = {
+    1: "Gennaio", 2: "Febbraio", 3: "Marzo", 4: "Aprile",
+    5: "Maggio", 6: "Giugno", 7: "Luglio", 8: "Agosto",
+    9: "Settembre", 10: "Ottobre", 11: "Novembre", 12: "Dicembre"
+}
+
+def format_filename(filename):
+    name, ext = os.path.splitext(filename)
+    parts = name.split("_")
+    if re.match(r"\d{4}-\d{2}-\d{2}$", parts[-1]):
+        date_part = parts.pop()
+        dt = datetime.strptime(date_part, "%Y-%m-%d")
+        date_str = f"{dt.day} {MONTH_IT[dt.month]} {dt.year}"
+    else:
+        date_str = None
+    title = " ".join(part.capitalize() for part in parts)
+    if date_str:
+        title = f"{title} {date_str}"
+    return title
 
 import os
 import shutil
 import subprocess
-import sys
+from pathlib import Path
+
+SRC_DIR = Path("src")
+OUTPUT_DIR = Path("output")
+MAX_LEVELS = 3
+
+def clear_output_folder():
+    if OUTPUT_DIR.exists() and OUTPUT_DIR.is_dir():
+        shutil.rmtree(OUTPUT_DIR)
 
 def cleanup_source_pdf():
-    """
-    Rimuove tutti i file PDF dalla cartella src e sottocartelle
-    """
-    print("\n=== CLEANING SOURCE DIRECTORY ===")
-    pdf_files_removed = 0
-    
-    for root, dirs, files in os.walk("src"):
+    for root, dirs, files in os.walk(SRC_DIR):
         for file in files:
-            if file.endswith(".pdf"):
-                pdf_path = os.path.join(root, file)
+            if file.endswith((".pdf", ".log", ".aux", ".fls", ".out", ".fdb_latexmk", ".synctex.gz", ".toc")):
                 try:
-                    os.remove(pdf_path)
-                    print(f"✓ Removed PDF from source: {pdf_path}")
-                    pdf_files_removed += 1
-                except Exception as e:
-                    print(f"✗ Error removing {pdf_path}: {e}")
-    
-    print(f"Removed {pdf_files_removed} PDF files from source directory")
+                    os.remove(os.path.join(root, file))
+                except:
+                    pass
 
 def compile_tex_to_pdf():
-    print("=== STARTING COMPILATION ===")
-    print("Current working directory:", os.getcwd())
-    print("Directory contents:", os.listdir('.'))
-    
-    # Crea la cartella output se non esiste
-    if not os.path.exists("output"):
-        os.makedirs("output")
-        print("Created output directory")
-    
-    # Cerca tutti i file .tex nella cartella src e sottocartelle
+    clear_output_folder()
+
+    if not OUTPUT_DIR.exists():
+        OUTPUT_DIR.mkdir(parents=True)
+
     tex_files = []
-    if os.path.exists("src"):
-        print("Found src directory")
-        for root, dirs, files in os.walk("src"):
-            print(f"Scanning: {root}")
-            for file in files:
-                if file.endswith(".tex"):
-                    tex_path = os.path.join(root, file)
-                    tex_files.append(tex_path)
-                    print(f"Found .tex file: {tex_path}")
-    else:
-        print("ERROR: 'src' directory not found!")
-        return
-    
-    if not tex_files:
-        print("No .tex files found in src directory!")
-        return
-    
-    print(f"Found {len(tex_files)} .tex files to compile")
-    
-    # Compila ogni file .tex
-    success_count = 0
-    for tex_file in tex_files:
+    for tex_path in SRC_DIR.rglob("*.tex"):
         try:
-            print(f"\n=== COMPILING: {tex_file} ===")
-            
-            # Directory del file .tex
-            tex_dir = os.path.dirname(tex_file)
-            tex_name = os.path.basename(tex_file)
-            
-            print(f"Changing to directory: {tex_dir}")
-            print(f"Compiling file: {tex_name}")
-            
-            # Compila con latexmk
+            with open(tex_path, "r", encoding="utf-8", errors="ignore") as f:
+                if "\\documentclass" in f.read(1024):
+                    tex_files.append(tex_path)
+        except:
+            continue
+
+    for tex_file in tex_files:
+        tex_dir = tex_file.parent
+        tex_name = tex_file.name
+
+        try:
+            # Compile .tex to PDF inside its own folder
             result = subprocess.run(
-                ["latexmk", "-pdf", "-interaction=nonstopmode", tex_name],
-                cwd=tex_dir,
+                ["latexmk", "-pdf", "-interaction=nonstopmode", "-f", tex_name],
+                cwd=str(tex_dir),
                 capture_output=True,
                 text=True,
                 timeout=60
             )
-            
-            print(f"Compilation return code: {result.returncode}")
-            if result.stdout:
-                print("STDOUT:", result.stdout[-1000:])
-            if result.stderr:
-                print("STDERR:", result.stderr[-1000:])
-            
-            if result.returncode == 0:
-                # Trova il file PDF generato
-                pdf_name = os.path.splitext(tex_name)[0] + ".pdf"
-                pdf_path = os.path.join(tex_dir, pdf_name)
-                
-                print(f"Looking for PDF at: {pdf_path}")
-                if os.path.exists(pdf_path):
-                    print(f"PDF successfully created: {pdf_path}")
-                    
-                    # Crea struttura cartelle corrispondente in output,
-                    # ma senza l'ultima sottocartella del sorgente
-                    relative_path = os.path.relpath(tex_dir, "src")
-                    parent_relative = os.path.dirname(relative_path)
-                    output_dir = os.path.join("output", parent_relative)
-                    os.makedirs(output_dir, exist_ok=True)
-                    
-                    # Copia il PDF nella cartella output
-                    output_pdf_path = os.path.join(output_dir, pdf_name)
-                    shutil.copy2(pdf_path, output_pdf_path)
-                    
-                    print(f"✓ PDF copied to: {output_pdf_path}")
-                    success_count += 1
-                else:
-                    print(f"✗ PDF not found at: {pdf_path}")
-                    print(f"Files in {tex_dir}:")
-                    for f in os.listdir(tex_dir):
-                        print(f"  - {f}")
+
+            # consider compilation successful if the PDF now exists
+            pdf_name = tex_file.stem + ".pdf"
+            pdf_path = tex_dir / pdf_name
+            if pdf_path.exists():
+                # copy to output
+                relative_parts = tex_dir.relative_to(SRC_DIR).parts
+                if len(relative_parts) > MAX_LEVELS:
+                    relative_parts = relative_parts[:MAX_LEVELS]
+                output_dir = OUTPUT_DIR.joinpath(*relative_parts)
+                output_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(pdf_path, output_dir / pdf_name)
             else:
-                print(f"✗ Compilation failed for: {tex_file}")
-                
+                print(f"Failed to compile {tex_file}")
+
+
+            pdf_name = tex_file.stem + ".pdf"
+            pdf_path = tex_dir / pdf_name
+            if not pdf_path.exists():
+                continue
+
+            # Compute relative path to SRC_DIR
+            relative_parts = tex_dir.relative_to(SRC_DIR).parts
+            # Truncate to MAX_LEVELS only if more
+            if len(relative_parts) > MAX_LEVELS:
+                relative_parts = relative_parts[:MAX_LEVELS]
+
+            output_dir = OUTPUT_DIR.joinpath(*relative_parts)
+            output_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(pdf_path, output_dir / pdf_name)
+
         except Exception as e:
-            print(f"✗ Error compiling {tex_file}: {e}")
-    
-    print(f"\n=== COMPILATION SUMMARY ===")
-    print(f"Successfully compiled: {success_count}/{len(tex_files)} files")
-    
-    # PULISCI SOLO DOPO AVER COPIATO TUTTI I PDF
+            print(f"Error processing {tex_file}: {e}")
+            continue
+
     cleanup_source_pdf()
+
+
+def build_tree(path: Path, depth=0, max_depth=MAX_DEPTH):
+    node = {}
+    if path.is_dir():
+        pdfs = sorted([f for f in path.iterdir() if f.is_file() and f.suffix.lower() == ".pdf"])
+        if pdfs:
+            node["_files"] = [(format_filename(f.name), str(f)) for f in pdfs]
+        for d in sorted([d for d in path.iterdir() if d.is_dir()]):
+            node[d.name] = build_tree(d, depth + 1, max_depth)
+    return node
+
+
+def generate_html(node, level=2, indent=0):
+    html = []
+    space = "    " * indent
+    for key in sorted(node.keys(), key=lambda k: (SECTION_ORDER.index(k) if k in SECTION_ORDER else 1000, k.lower())):
+        if key == "_files":
+            for name, path in node["_files"]:
+                rel = os.path.relpath(path, ".")
+                html.append(f'{space}<p><a href="./{rel}" target="_blank">{name}</a></p>')
+        else:
+            tag = f"h{min(level, 4)}"
+            section_id = key.lower().replace(" ", "-") if level == 2 else None
+            if level == 2:
+                html.append(f'{space}<section id="{section_id}">')
+            html.append(f'{space}<{tag}>{key}</{tag}>')
+            html.append(generate_html(node[key], level + 1, indent + 1))
+            if level == 2:
+                html.append(f'{space}</section>')
+    return "\n".join(html)
+
+def update_index_html():
+    if not INDEX_HTML_PATH.exists():
+        print("index.html not found")
+        return
+
+    html_text = INDEX_HTML_PATH.read_text(encoding="utf-8")
+
+    # Extract <section id="contatti"> as raw text
+    start_idx = html_text.find('<section id="contatti"')
+    if start_idx == -1:
+        contatti_html = ""
+    else:
+        end_idx = html_text.find('</section>', start_idx) + len('</section>')
+        contatti_html = html_text[start_idx:end_idx]
+        html_text = html_text[:start_idx] + html_text[end_idx:]  # remove from original
+
+    # Build tree and generate new HTML for main sections
+    tree = build_tree(OUTPUT_DIR)
+    generated_html = generate_html(tree)
+
+    # Prepare copyright line
+    copyright_line = '<p id="copyright">Copyright© 2025 by NullPointers Group - All rights reserved</p>'
+
+    # Replace <main>...</main> with generated HTML + preserved Contatti + copyright
+    main_start = html_text.find('<main>')
+    main_end = html_text.find('</main>', main_start) + len('</main>')
+    new_main = f"<main>\n{generated_html}\n{contatti_html}\n{copyright_line}\n</main>"
+    html_text = html_text[:main_start] + new_main + html_text[main_end:]
+
+    INDEX_HTML_PATH.write_text(html_text, encoding="utf-8")
+    print("index.html updated correctly with all folders, PDFs, preserved Contatti, and copyright")
+
 
 if __name__ == "__main__":
     compile_tex_to_pdf()
+    update_index_html()
