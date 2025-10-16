@@ -96,9 +96,11 @@ def compile_tex_to_pdf():
                 if os.path.exists(pdf_path):
                     print(f"PDF successfully created: {pdf_path}")
                     
-                    # Crea struttura cartelle corrispondente in output
+                    # Crea struttura cartelle corrispondente in output,
+                    # ma senza l'ultima sottocartella del sorgente
                     relative_path = os.path.relpath(tex_dir, "src")
-                    output_dir = os.path.join("output", relative_path)
+                    parent_relative = os.path.dirname(relative_path)
+                    output_dir = os.path.join("output", parent_relative)
                     os.makedirs(output_dir, exist_ok=True)
                     
                     # Copia il PDF nella cartella output
