@@ -107,6 +107,18 @@ section {
     scroll-margin-top: 0;
 }
 
+#rtb{
+
+}
+
+#pb{
+
+}
+
+#diario-di-bordo{
+
+}
+
 #candidatura {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -114,11 +126,6 @@ section {
 
 #contatti {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-}
-
-#info {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     color: white;
 }
 

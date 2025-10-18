@@ -9,7 +9,7 @@ INDEX_HTML_PATH = Path("index.html")
 SRC_DIR = Path("src")
 OUTPUT_DIR = Path("output")
 SECTION_ORDER = ["RTB", "PB", "Candidatura", "Diario Di Bordo"]
-MAX_DEPTH = 3  # maximum heading depth for HTML
+MAX_DEPTH = 2  # maximum heading depth for HTML
 
 MONTH_IT = {
     1: "Gennaio", 2: "Febbraio", 3: "Marzo", 4: "Aprile",
@@ -20,8 +20,8 @@ MONTH_IT = {
 def format_filename(filename):
     name, ext = os.path.splitext(filename)
     parts = name.split("_")
-    if re.match(r"\d{4}-\d{2}-\d{2}$", parts[-1]):
-        date_part = parts.pop()
+    if re.match(r"^\d{4}-\d{2}-\d{2}$", parts[0]):
+        date_part = parts.pop(0)
         dt = datetime.strptime(date_part, "%Y-%m-%d")
         date_str = f"{dt.day} {MONTH_IT[dt.month]} {dt.year}"
     else:
@@ -30,15 +30,6 @@ def format_filename(filename):
     if date_str:
         title = f"{title} {date_str}"
     return title
-
-import os
-import shutil
-import subprocess
-from pathlib import Path
-
-SRC_DIR = Path("src")
-OUTPUT_DIR = Path("output")
-MAX_LEVELS = 3
 
 def clear_output_folder():
     if OUTPUT_DIR.exists() and OUTPUT_DIR.is_dir():
@@ -88,8 +79,8 @@ def compile_tex_to_pdf():
             if pdf_path.exists():
                 # copy to output
                 relative_parts = tex_dir.relative_to(SRC_DIR).parts
-                if len(relative_parts) > MAX_LEVELS:
-                    relative_parts = relative_parts[:MAX_LEVELS]
+                if len(relative_parts) > MAX_DEPTH:
+                    relative_parts = relative_parts[:MAX_DEPTH]
                 output_dir = OUTPUT_DIR.joinpath(*relative_parts)
                 output_dir.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(pdf_path, output_dir / pdf_name)
@@ -104,9 +95,9 @@ def compile_tex_to_pdf():
 
             # Compute relative path to SRC_DIR
             relative_parts = tex_dir.relative_to(SRC_DIR).parts
-            # Truncate to MAX_LEVELS only if more
-            if len(relative_parts) > MAX_LEVELS:
-                relative_parts = relative_parts[:MAX_LEVELS]
+            # Truncate to MAX_DEPTH only if more
+            if len(relative_parts) > MAX_DEPTH:
+                relative_parts = relative_parts[:MAX_DEPTH]
 
             output_dir = OUTPUT_DIR.joinpath(*relative_parts)
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -121,13 +112,24 @@ def compile_tex_to_pdf():
 
 def build_tree(path: Path, depth=0, max_depth=MAX_DEPTH):
     node = {}
-    if path.is_dir():
-        pdfs = sorted([f for f in path.iterdir() if f.is_file() and f.suffix.lower() == ".pdf"])
-        if pdfs:
-            node["_files"] = [(format_filename(f.name), str(f)) for f in pdfs]
-        for d in sorted([d for d in path.iterdir() if d.is_dir()]):
-            node[d.name] = build_tree(d, depth + 1, max_depth)
+    if not path.exists() or not path.is_dir():
+        return {}
+
+    # collect pdfs in this directory
+    pdfs = sorted([f for f in path.iterdir() if f.is_file() and f.suffix.lower() == ".pdf"])
+    if pdfs:
+        node["_files"] = [(format_filename(f.name), str(f)) for f in pdfs]
+
+    # traverse subdirectories up to max_depth and only include children that contain files/subchildren
+    for d in sorted([d for d in path.iterdir() if d.is_dir()]):
+        if max_depth is not None and depth + 1 > max_depth:
+            continue
+        child = build_tree(d, depth + 1, max_depth)
+        if child:  # only add directories that have files (directly or in descendants)
+            node[d.name] = child
+
     return node
+
 
 
 def generate_html(node, level=2, indent=0):
@@ -137,7 +139,8 @@ def generate_html(node, level=2, indent=0):
         if key == "_files":
             for name, path in node["_files"]:
                 rel = os.path.relpath(path, ".")
-                html.append(f'{space}<p><a href="./{rel}" target="_blank">{name}</a></p>')
+                tag = f"h{min(level, 4)}"
+                html.append(f'{space}<{tag}><a href="./{rel}" target="_blank">{name}</a></{tag}>')
         else:
             tag = f"h{min(level, 4)}"
             section_id = key.lower().replace(" ", "-") if level == 2 else None
@@ -148,6 +151,7 @@ def generate_html(node, level=2, indent=0):
             if level == 2:
                 html.append(f'{space}</section>')
     return "\n".join(html)
+
 
 def update_index_html():
     if not INDEX_HTML_PATH.exists():
