@@ -107,16 +107,19 @@ section {
     scroll-margin-top: 0;
 }
 
-#rtb{
-
+#rtb {
+    background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); /* verde acqua → blu profondo */
+    color: white;
 }
 
-#pb{
-
+#pb {
+    background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%); /* arancio → rosso corallo */
+    color: white;
 }
 
-#diario-di-bordo{
-
+#diario-di-bordo {
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); /* azzurro brillante → blu intenso */
+    color: white;
 }
 
 #candidatura {
