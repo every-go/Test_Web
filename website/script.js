@@ -1,11 +1,8 @@
-document.addEventListener("scroll", function() {
-    var header = document.querySelector("header");
-    var logo = document.querySelector("#header-logo");
-    if(window.scrollY > 100) {
-        header.classList.add("scrolled");
-        logo.classList.add("scrolled-logo");
-    } else {
-        header.classList.remove("scrolled");
-        logo.classList.remove("scrolled-logo");
-    }
+document.querySelectorAll("#nav-navigation a").forEach(link => {
+    link.addEventListener("click", function () {
+        // Rimuove active da tutti
+        document.querySelectorAll("#nav-navigation a").forEach(l => l.classList.remove("active"));
+        // Aggiunge active a questo
+        this.classList.add("active");
+    });
 });
