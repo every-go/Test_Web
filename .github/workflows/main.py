@@ -9,7 +9,7 @@ INDEX_HTML_PATH = Path("index.html")
 SRC_DIR = Path("src")
 OUTPUT_DIR = Path("output")
 SECTION_ORDER = ["RTB", "PB", "Candidatura", "Diario Di Bordo"]
-MAX_DEPTH = 2  # maximum heading depth for HTML
+MAX_DEPTH = 2
 
 MONTH_IT = {
     1: "Gennaio", 2: "Febbraio", 3: "Marzo", 4: "Aprile",
@@ -62,75 +62,46 @@ def compile_tex_to_pdf():
     for tex_file in tex_files:
         tex_dir = tex_file.parent
         tex_name = tex_file.name
-
         try:
-            # Compile .tex to PDF inside its own folder
-            result = subprocess.run(
+            subprocess.run(
                 ["latexmk", "-pdf", "-interaction=nonstopmode", "-f", tex_name],
                 cwd=str(tex_dir),
                 capture_output=True,
                 text=True,
                 timeout=60
             )
-
-            # consider compilation successful if the PDF now exists
             pdf_name = tex_file.stem + ".pdf"
             pdf_path = tex_dir / pdf_name
             if pdf_path.exists():
-                # copy to output
                 relative_parts = tex_dir.relative_to(SRC_DIR).parts
                 if len(relative_parts) > MAX_DEPTH:
                     relative_parts = relative_parts[:MAX_DEPTH]
                 output_dir = OUTPUT_DIR.joinpath(*relative_parts)
                 output_dir.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(pdf_path, output_dir / pdf_name)
-            else:
-                print(f"Failed to compile {tex_file}")
-
-
-            pdf_name = tex_file.stem + ".pdf"
-            pdf_path = tex_dir / pdf_name
-            if not pdf_path.exists():
-                continue
-
-            # Compute relative path to SRC_DIR
-            relative_parts = tex_dir.relative_to(SRC_DIR).parts
-            # Truncate to MAX_DEPTH only if more
-            if len(relative_parts) > MAX_DEPTH:
-                relative_parts = relative_parts[:MAX_DEPTH]
-
-            output_dir = OUTPUT_DIR.joinpath(*relative_parts)
-            output_dir.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(pdf_path, output_dir / pdf_name)
-
         except Exception as e:
             print(f"Error processing {tex_file}: {e}")
             continue
 
     cleanup_source_pdf()
 
-
 def build_tree(path: Path, depth=0, max_depth=MAX_DEPTH):
     node = {}
     if not path.exists() or not path.is_dir():
         return {}
 
-    # collect pdfs in this directory
     pdfs = sorted([f for f in path.iterdir() if f.is_file() and f.suffix.lower() == ".pdf"])
     if pdfs:
         node["_files"] = [(format_filename(f.name), str(f)) for f in pdfs]
 
-    # traverse subdirectories up to max_depth and only include children that contain files/subchildren
     for d in sorted([d for d in path.iterdir() if d.is_dir()]):
         if max_depth is not None and depth + 1 > max_depth:
             continue
         child = build_tree(d, depth + 1, max_depth)
-        if child:  # only add directories that have files (directly or in descendants)
+        if child:
             node[d.name] = child
 
     return node
-
-
 
 def generate_html(node, level=2, indent=0):
     html = []
@@ -152,7 +123,6 @@ def generate_html(node, level=2, indent=0):
                 html.append(f'{space}</section>')
     return "\n".join(html)
 
-
 def update_index_html():
     if not INDEX_HTML_PATH.exists():
         print("index.html not found")
@@ -160,31 +130,41 @@ def update_index_html():
 
     html_text = INDEX_HTML_PATH.read_text(encoding="utf-8")
 
-    # Extract <section id="contatti"> as raw text
+    # Preserve Contatti
     start_idx = html_text.find('<section id="contatti"')
     if start_idx == -1:
         contatti_html = ""
     else:
         end_idx = html_text.find('</section>', start_idx) + len('</section>')
         contatti_html = html_text[start_idx:end_idx]
-        html_text = html_text[:start_idx] + html_text[end_idx:]  # remove from original
+        html_text = html_text[:start_idx] + html_text[end_idx:]
 
-    # Build tree and generate new HTML for main sections
     tree = build_tree(OUTPUT_DIR)
     generated_html = generate_html(tree)
 
-    # Prepare copyright line
-    copyright_line = '<p id="copyright">Copyright© 2025 by NullPointers Group - All rights reserved</p>'
+    # Ensure nav <li> for all sections
+    nav_pattern = re.compile(r'<ul id="nav-navigation">(.*?)</ul>', re.DOTALL)
+    match = nav_pattern.search(html_text)
+    if match:
+        nav_content = match.group(1)
+        new_nav = ""
+        for sec in SECTION_ORDER + ["Contatti"]:
+            folder_exists = sec.lower() in (k.lower() for k in tree.keys())
+            li = f'<li><a href="#{sec.lower()}">{sec}</a></li>'
+            if sec == "Contatti" or folder_exists:
+                new_nav += f"{li}\n"
+            else:
+                new_nav += f"<!-- {li} -->\n"
+        html_text = html_text[:match.start(1)] + new_nav + html_text[match.end(1):]
 
-    # Replace <main>...</main> with generated HTML + preserved Contatti + copyright
+    copyright_line = '<p id="copyright">Copyright© 2025 by NullPointers Group - All rights reserved</p>'
     main_start = html_text.find('<main>')
     main_end = html_text.find('</main>', main_start) + len('</main>')
     new_main = f"<main>\n{generated_html}\n{contatti_html}\n{copyright_line}\n</main>"
     html_text = html_text[:main_start] + new_main + html_text[main_end:]
 
     INDEX_HTML_PATH.write_text(html_text, encoding="utf-8")
-    print("index.html updated correctly with all folders, PDFs, preserved Contatti, and copyright")
-
+    print("index.html updated correctly")
 
 if __name__ == "__main__":
     compile_tex_to_pdf()
