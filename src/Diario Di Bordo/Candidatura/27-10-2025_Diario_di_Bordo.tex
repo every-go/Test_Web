@@ -1,0 +1,104 @@
+\documentclass[11pt]{beamer}
+\usetheme{CambridgeUS}
+
+%-----------------------------------------------------------------------
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+%-----------------------------------------------------------------------
+% Package customization
+\definecolor{links}{HTML}{FC0D30}
+\hypersetup{colorlinks,linkcolor=,urlcolor=links}
+
+%-----------------------------------------------------------------------
+% Commands
+\renewcommand{\emph}[1]{\textbf{#1}}
+\graphicspath{ {immagini/} {../../shared/images/} }
+
+%-----------------------------------------------------------------------
+% Headings
+\author{NullPointers Group}
+\title{Diario Di Bordo}
+\setbeamercovered{transparent} 
+\setbeamertemplate{navigation symbols}{}
+\logo{%
+	\makebox[0.95\paperwidth]{%  <-- Larghezza totale quasi quanto la slide
+		\includegraphics[width=0.08\textwidth]{logo_unipd}\hfill%
+		\includegraphics[width=0.1\textwidth]{logo_gruppo}% ← secondo logo
+	}%
+}
+\institute{Università di Padova} 
+\date{27 Ottobre 2025}
+
+%-----------------------------------------------------------------------
+% Document
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Problemi principali}
+	Nel corso di questo periodo fra inizio composizione gruppi progetto I lotto e oggi abbiamo affrontato diversi problemi:
+	\begin{itemize}
+		\item Gestione repository e automatizzazione di essa
+		\item Creazione sito web, compreso design
+		\item Gestione indirizzo mail
+		\item Scrittura verbali
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Repository}
+	Abbiamo deciso di usare GitHub per mantenere la repository. \\
+	Sfruttando il fatto che fossimo un team abbiamo utilizzato la nostra mail per creare un'organizzazione, una funzionalità GitHub che permette più facilmente di avere collaboratori multipli su più repository senza dover inserire manualmente su ogni repository i permessi.\\
+	Abbiamo avuto difficoltà sulla scelta di come gestire le cartelle, decidendo di tenere una cartella \emph{src} che contiene i file sorgenti \textit{.tex} per la scrittura di documenti ed una cartella \emph{website} con il file \textit{.css} e il file \textit{.js} necessari per il sito hostato grazie a GitHub Pages, un servizio messo a dispozione da GitHub per permettere di mostrare un sito web partendo dai file \textit{.html} mantenuti nella repository. \\
+	Il nostro sito si trova al seguente link: \url{https://nullpointersgroup.github.io/Documentazione/}
+\end{frame}
+
+\begin{frame}
+	Oltre a quanto menzionato prima, c'è stata molta difficoltà nel costruire un'automatizzazione del nostro sito.\\
+	Questo ci è stato possibile tenendo nella cartella \emph{.github/workflows} due file: 
+	\begin{itemize}
+		\item build.yml: i file con quell'estensione permettono di costruire un workflow automatico su GitHub. Il nostro workflow scarica le dipendenze necessarie per compilare i file LaTeX e avvia lo script Python
+		\item main.py: questo script prima compila tutti i file \textit{.tex} nella cartella src inserendo i \textit{.pdf} nella cartella output che copierà le sottocartelle con un massimo di profondità 2. Infine riscrive l'\textit{html} per mantenere tutti i collegamenti ai documenti, sia appena inseriti che quelli precedenti
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Sito web}
+	La difficoltà del sito web è stata quella di realizzare una struttura \textit{.html} con dei file \textit{.css} e \textit{.js} adatti per costruire un sito web bello da vedere ma allo stesso tempo utilizzabile con lo script senza troppi effetti grafici che potrebbero rovinare la corretta visibilità.\\
+	Abbiamo messo la funzionalità sopra l'estetica.
+\end{frame}
+
+\begin{frame}{Indirizzo mail}
+	Abbiamo avuto un grosso problema ben 2 volte con l'indirizzo mail.\\
+	Infatti ci è stata bloccata perché secondo Google abbiamo condiviso la mail con troppi dispositivi ed è contro le loro policy.\\
+	Questo problema ci ha costretto a creare una nuova mail (con annesso nuovo account GitHub) e riscrivere alcuni file scritti fino a quel momento.\\
+	Fortunatamente non abbiamo perso la repository GitHub e ci è stato facile ripristinarla.
+\end{frame}
+
+\begin{frame}{Verbali}
+	L'ultima grande difficoltà che abbiamo avuto è stata la scelta della struttura per redigere i verbali.\\
+	Abbiamo optato per una struttura fissa sia per i verbali interni che esterni, che comprende fra le altre titolo, registro delle modifiche, il diario di bordo, le decisioni e le task future da affrontare (quest'ultime identificate tramite codice univoco descritto nel primo verbale interno)
+\end{frame}
+
+\begin{frame}{Conclusione}
+ Per ogni domanda:
+ \begin{itemize}
+  \item email: \href{mailto:nullpointersg@gmail.com}{nullpointersg@gmail.com}
+ \end{itemize}
+ 
+ \begin{columns}
+  \begin{column}{0.15\textwidth}
+   \includegraphics[width=0.99\textwidth]{logo_github}
+  \end{column}
+  \begin{column}{0.85\textwidth}
+   La nostra repository è disponibile al seguente link: \url{https://github.com/NullPointersGroup/Documentazione}
+  \end{column}
+ \end{columns}
+\end{frame}
+
+\end{document}
