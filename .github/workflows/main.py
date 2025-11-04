@@ -20,16 +20,27 @@ MONTH_IT = {
 def format_filename(filename):
     name, ext = os.path.splitext(filename)
     parts = name.split("_")
-    if re.match(r"^\d{4}-\d{2}-\d{2}$", parts[0]):
-        date_part = parts.pop(0)
-        dt = datetime.strptime(date_part, "%Y-%m-%d")
-        date_str = f"{dt.day} {MONTH_IT[dt.month]} {dt.year}"
-    else:
-        date_str = None
-    title = " ".join(part.capitalize() for part in parts)
-    if date_str:
-        title = f"{title} {date_str}"
-    return title
+    first = parts[0]
+
+    # caso con data YYYY-MM-DD
+    if re.match(r"^\d{4}-\d{2}-\d{2}$", first):
+        date = first  # mantieni trattini
+
+        # file che contengono "VE" nel nome → Verbale Esterno
+        if "est" in name.lower():
+            return f"{date}_VE"
+
+        # file che contengono "VI" nel nome → Verbale Interno
+        if "int" in name.lower():
+            return f"{date}_VI"
+
+        # nessuna etichetta → solo data
+        return date
+
+    # nessuna data → restituisci nome base
+    return name
+
+
 
 def clear_output_folder():
     if OUTPUT_DIR.exists() and OUTPUT_DIR.is_dir():
@@ -89,8 +100,32 @@ def build_tree(path: Path, depth=0, max_depth=MAX_DEPTH):
     node = {}
     if not path.exists() or not path.is_dir():
         return {}
+    
+    def _extract_date(path):
+        m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", path.name)
+        if not m:
+            return 0
+        return int(m.group(1)) * 10000 + int(m.group(2)) * 100 + int(m.group(3))
 
-    pdfs = sorted([f for f in path.iterdir() if f.is_file() and f.suffix.lower() == ".pdf"])
+    pdfs = [f for f in path.iterdir() if f.is_file() and f.suffix.lower() == ".pdf"]
+
+    # separa file datati da non-datati
+    dated = []
+    plain = []
+
+    for f in pdfs:
+        if re.match(r"^\d{4}-\d{2}-\d{2}", f.stem):
+            dated.append(f)
+        else:
+            plain.append(f)
+
+    # ordina solo i datati in ordine decrescente
+    dated.sort(key=_extract_date, reverse=True)
+
+    # ricompone: prima i datati (recenti→vecchi), poi gli altri mantenendo ordine originale
+    pdfs = dated + sorted(plain, key=lambda x: x.name.lower())
+
+
     if pdfs:
         node["_files"] = [(format_filename(f.name), str(f)) for f in pdfs]
 

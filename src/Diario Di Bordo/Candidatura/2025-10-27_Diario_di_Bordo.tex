@@ -42,48 +42,34 @@
 \titlepage
 \end{frame}
 
-\begin{frame}{Problemi principali}
-	Nel corso del periodo compreso tra l’inizio della composizione dei gruppi del progetto del primo lotto e oggi abbiamo affrontato diversi problemi:
+\begin{frame}{Decisioni}
+	Nel corso del periodo compreso abbiamo preso le seguenti decisioni:
 	\begin{itemize}
-		\item Gestione repository e automatizzazione di essa
-		\item Creazione sito web, compreso design
-		\item Gestione indirizzo mail
+		\item Nome gruppo e logo
+		\item GitHub
+		\item Gestione cartelle
+		\item Sito web
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Problemi}
+	Invece, i nostri problemi principali sono stati:
+	\begin{itemize}
+		\item Automazione
 		\item Scrittura verbali
+		\item Calcolo ore a lungo termine
+		\item Riunioni con azienda
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Repository}
-	Abbiamo deciso di usare GitHub per mantenere la repository. \\
-	Poiché lavoriamo come team, abbiamo utilizzato la nostra mail per creare un’organizzazione, una funzionalità di GitHub che consente di gestire più collaboratori su diverse repository senza dover assegnare manualmente i permessi.\\
-	Abbiamo avuto difficoltà sulla scelta di come gestire le cartelle, decidendo di tenere una cartella \emph{src} che contiene i file sorgenti \textit{.tex} per la scrittura di documenti ed una cartella \emph{website} con il file \textit{.css} e il file \textit{.js} necessari per il sito hostato grazie a GitHub Pages, un servizio messo a disposizione da GitHub per permettere di mostrare un sito web partendo dai file \textit{.html} mantenuti nella repository. \\
-	Il nostro sito si trova al seguente link: \url{https://nullpointersgroup.github.io/Documentazione/}
-\end{frame}
-
-\begin{frame}{Automatizzazione}
-	Oltre a quanto menzionato prima, c'è stata molta difficoltà nel costruire un'automatizzazione del nostro sito.\\
-	Questo ci è stato possibile collocando nella cartella \emph{.github/workflows} due file: 
+\begin{frame}{Attività future}
+	Le nostre attività per il futuro sono:
 	\begin{itemize}
-		\item build.yml: i file con quell'estensione permettono di costruire un workflow automatico su GitHub. Il nostro workflow scarica le dipendenze necessarie per compilare i file LaTeX e avvia lo script Python
-		\item main.py: lo script compila prima tutti i file \textit{.tex} nella cartella src inserendo i \textit{.pdf} nella cartella output copiando le sottocartelle fino a una profondità massima di due livelli. Infine riscrive l'HTML per mantenere tutti i collegamenti ai documenti, sia appena inseriti che quelli precedenti
+		\item Terminazione domanda di candidatura
+		\item Perfezionare documenti per candidatura
+		\item Avvio della stesura di proposte progettuali
+		\item Colloquio con azienda VarGroup per approfondimento capitolato C2
 	\end{itemize}
-\end{frame}
-
-\begin{frame}{Sito web}
-	La difficoltà del sito web è stata quella di realizzare una struttura \textit{.html} con dei file \textit{.css} e \textit{.js} adatti a costruire un sito web esteticamente gradevole e compatibile con lo script.\\
-	Abbiamo privilegiato la funzionalità rispetto all’estetica.
-\end{frame}
-
-\begin{frame}{Indirizzo mail}
-	Abbiamo avuto un grosso problema ben due volte con l'indirizzo mail.\\
-	Google ha bloccato la nostra casella di posta perché risultava utilizzata su troppi dispositivi con IP diversi, in violazione delle loro policy.\\
-	Questo problema ci ha costretto a creare una nuova mail (con la creazione di un nuovo account GitHub associato) e riscrivere alcuni file scritti fino a quel momento.\\
-	Fortunatamente non abbiamo perso la repository GitHub e ci è stato facile ripristinarla.
-\end{frame}
-
-\begin{frame}{Verbali}
-	L'ultima grande difficoltà che abbiamo avuto è stata la scelta della struttura per redigere i verbali.\\
-	Abbiamo optato per una struttura fissa sia per i verbali interni che esterni, che comprende fra gli altri elementi il titolo, il registro delle modifiche, il diario di bordo, le decisioni e le task future da affrontare (questi ultimi identificati tramite codice univoco descritto nel primo verbale interno).\\
-	Infine, abbiamo deciso di salvare i nomi del file col formato YYYY-MM-DD iniziale per permettere un corretto ordinamento da parte di tutti i sistemi operativi.
 \end{frame}
 
 \begin{frame}{Conclusione}
