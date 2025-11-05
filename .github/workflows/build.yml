@@ -8,58 +8,26 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: ghcr.io/xu-cheng/texlive-full:latest
     permissions:
       contents: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Cache TeX Live
-        uses: actions/cache@v4
-        with:
-          path: |
-            $HOME/texlive
-            $HOME/.texlive
-          key: texlive-cache
-          restore-keys: texlive-cache
-
-      - name: Install TeX Live if missing
-        run: |
-          if [ ! -d "$HOME/texlive" ]; then
-            wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
-            tar -xzf install-tl-unx.tar.gz
-            DIR=$(find . -maxdepth 1 -type d -name "install-tl-*" | head -n 1)
-            cd "$DIR"
-            printf "selected_scheme scheme-small\n" > profile.txt
-            ./install-tl --profile=profile.txt --texdir=$HOME/texlive
-          fi
-
-      - name: Set PATH
-        run: |
-          TEXBIN=$(find "$HOME/texlive" -type d -path "*/bin/*" | head -n 1)
-          echo "$TEXBIN" >> $GITHUB_PATH
-
-      - name: Update and install LaTeX packages
-        run: |
-          tlmgr update --self --all
-          tlmgr install latexmk babel-italian collection-latexrecommended
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      - name: Run main.py script
+      - name: Compile
         run: python .github/workflows/main.py
 
-      - name: Check output
-        run: ls -la output/ || true
-
-      - name: Commit and push
+      - name: Commit and push PDFs
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
+          git add output/*.pdf
           git commit -m "Automated PDF compilation update" || exit 0
           git push origin main
