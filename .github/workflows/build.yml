@@ -14,7 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - run: pip install beartype
+      - run: |
+         apt-get update
+         apt-get install -y python3-pip
+         pip3 install beartype
+
 
       - run: python .github/worflows/main.py
 
