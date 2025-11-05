@@ -29,17 +29,18 @@ jobs:
           if [ ! -d "$HOME/texlive" ]; then
             wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
             tar -xzf install-tl-unx.tar.gz
-            cd install-tl-*
+            DIR=$(find . -maxdepth 1 -type d -name "install-tl-*" | head -n 1)
+            cd "$DIR"
             printf "selected_scheme scheme-small\n" > profile.txt
             ./install-tl --profile=profile.txt --texdir=$HOME/texlive
           fi
 
       - name: Set PATH
         run: |
-          TEXBIN="$HOME/texlive/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$(uname -m)"
+          TEXBIN=$(find "$HOME/texlive" -type d -path "*/bin/*" | head -n 1)
           echo "$TEXBIN" >> $GITHUB_PATH
 
-      - name: Update and install missing LaTeX packages
+      - name: Update and install LaTeX packages
         run: |
           tlmgr update --self --all
           tlmgr install latexmk babel-italian collection-latexrecommended
