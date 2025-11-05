@@ -18,11 +18,17 @@ jobs:
       - name: Cache TeX Live
         uses: actions/cache@v4
         with:
-          path: |
-            /usr/share/texlive
-            /var/lib/texlive
-          key: texlive-cache-${{ hashFiles('.github/workflows/this-file.yml') }}
+          path: ~/.texlive
+          key: texlive-cache-${{ hashFiles('**/*.tex') }}
           restore-keys: texlive-cache-
+    
+      - name: Install TeX Live (solo se non esiste)
+        run: |
+          if [ ! -d "$HOME/.texlive" ]; then
+            sudo apt-get update
+            sudo apt-get install -y texlive texlive-latex-extra texlive-lang-italian
+          fi
+
 
       - name: Set up Python
         uses: actions/setup-python@v4
