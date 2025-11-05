@@ -13,57 +13,52 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cache TeX Live
         uses: actions/cache@v4
         with:
-          path: ~/.texlive
-          key: texlive-cache-${{ hashFiles('**/*.tex') }}
-          restore-keys: texlive-cache-
-    
-      - name: Install TeX Live (solo se non esiste)
+          path: |
+            $HOME/texlive
+            $HOME/.texlive
+          key: texlive-cache
+          restore-keys: texlive-cache
+
+      - name: Install TeX Live if missing
         run: |
-          if [ ! -d "$HOME/.texlive" ]; then
-            sudo apt-get update
-            sudo apt-get install -y texlive texlive-latex-extra texlive-lang-italian
+          if [ ! -d "$HOME/texlive" ]; then
+            wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+            tar -xzf install-tl-unx.tar.gz
+            cd install-tl-*
+            printf "selected_scheme scheme-small\n" > profile.txt
+            ./install-tl --profile=profile.txt --texdir=$HOME/texlive
           fi
 
+      - name: Set PATH
+        run: |
+          TEXBIN="$HOME/texlive/bin/$(uname -s | tr '[:upper:]' '[:lower:]')/$(uname -m)"
+          echo "$TEXBIN" >> $GITHUB_PATH
+
+      - name: Update and install missing LaTeX packages
+        run: |
+          tlmgr update --self --all
+          tlmgr install latexmk babel-italian collection-latexrecommended
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      - name: Install LaTeX and dependencies
-        run: |
-          sudo apt-get update && sudo apt-get install -y \
-          latexmk \
-          texlive \
-          texlive-latex-extra \
-          texlive-lang-italian
-
-      - name: Debug file structure
-        run: |
-          echo "=== File structure ==="
-          find . -name "*.tex" -o -name "*.py" | head -20
-          echo "=== src contents ==="
-          ls -la src/Candidatura/
-
       - name: Run main.py script
-        run: |
-          python .github/workflows/main.py
+        run: python .github/workflows/main.py
 
-      - name: Check if output was created
-        run: |
-          echo "=== Checking output ==="
-          find . -name "*.pdf" | head -10
-          ls -la output/ 2>/dev/null || echo "Output folder not found"
+      - name: Check output
+        run: ls -la output/ || true
 
-      - name: Add, commit and push changes
+      - name: Commit and push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Automated PDF compilation update" || echo "No changes to commit"
+          git commit -m "Automated PDF compilation update" || exit 0
           git push origin main
