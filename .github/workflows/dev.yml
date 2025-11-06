@@ -3,7 +3,7 @@ name: Create PR from dev to main
 on:
   push:
     branches:
-      - dev
+      - feature/*
 
 jobs:
   create_pr:
