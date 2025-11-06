@@ -17,6 +17,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: main
-          title: "Verifica documentazione - dev → main"
+          branch: ${{ github.ref_name }} # il branch che ha generato il push
+          title: "Verifica documentazione - ${{ github.ref_name }} → main"
           body: "Controllare registro modifiche e validità contenuti."
           draft: false
