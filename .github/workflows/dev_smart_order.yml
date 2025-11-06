@@ -1,4 +1,5 @@
-name: Create PR from feature to main
+# Questo yml è già a posto per la repo di SMART ORDER
+name: Create PR from dev to main
 
 on:
   push:
