@@ -52,7 +52,7 @@ def format_filename(filename: str) -> str:
             return f"{date}_VI"
         return date
 
-    return name
+    return name.replace("_", " ")
 
 
 @maybe_beartype
