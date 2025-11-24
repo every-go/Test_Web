@@ -15,7 +15,7 @@ def find_glossary():
         logging.info(f"Glossario trovato in PB: {pb_gloss}")
         return pb_gloss
     if rtb_gloss.exists():
-        logging.info(f"Glossario trovato in RTB: {rtb_gloss}")
+        #logging.info(f"Glossario trovato in RTB: {rtb_gloss}")
         return rtb_gloss
     logging.error("Nessun glossario trovato in PB o RTB")
     return None
