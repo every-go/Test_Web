@@ -7,3 +7,7 @@
 *.DS_Store
 *.fdb_latexmk
 *.fls
+*.nav
+*.snm
+*.lof
+*.lot

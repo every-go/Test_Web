@@ -87,8 +87,20 @@ main {
     max-height: 100vh;
     width: 100%;
     overflow-y: scroll;
+    position: relative;
 }
 
+#glossario {
+    position: absolute;
+    text-decoration: none;
+    background-color: rgba(var(--verde-rgb), .2);
+    padding: .5em 1.5em;
+    right: 1em; 
+    top: 1em;
+    border-radius: 5px;
+    border: 2px solid var(--verde-hex);
+    z-index: 1;
+}
 
 nav {
     display: flex;
@@ -96,7 +108,6 @@ nav {
     height: 100%;
     position: relative;
     gap: 10vh;
-    position: sticky;
 }
 
 nav::after {
@@ -204,7 +215,7 @@ main section {
 
 #rtb::before,
 #pb::before,
-#diario-di-bordo::before,
+#diario::before,
 #candidatura::before {
     content: '';
     width: var(--content-bar-width);
@@ -218,7 +229,7 @@ main section {
 
 #rtb *:not(h2)::before,
 #pb *:not(h2)::before,
-#diario-di-bordo *:not(h2)::before,
+#diario *:not(h2)::before,
 #candidatura *:not(h2)::before {
     content: '';
     position: absolute;
