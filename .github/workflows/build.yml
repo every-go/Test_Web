@@ -14,7 +14,6 @@ permissions:
 
 jobs:
   build:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     container: ghcr.io/xu-cheng/texlive-full:latest
 
