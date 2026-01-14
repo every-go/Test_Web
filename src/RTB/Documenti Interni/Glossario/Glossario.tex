@@ -18,10 +18,13 @@ citecolor=blue]{hyperref}
 \usepackage[normalem]{ulem} % Per sottolineare il testo
 \usepackage{array} % Per la visualizzazione fluttuante di array di domande e risposte
 \usepackage{ragged2e} % Pacchetto necessario per \justifying che giustifica il testo di tabelle
+\usepackage[T1]{fontenc} %per {} come ""
 
 \newcommand{\ulhref}[2]{\href{#1}{\uline{#2}}} % Nuovo comando per sottolineare i link
 \newcommand{\ulref}[1]{\uline{\ref{#1}}} % Nuovo comando per sottolineare i collegamenti a immagini
 \setlength{\parindent}{0pt} % Rimuove il rientro automatico dei paragrafi
+\newcommand{\vr}[1]{\textquotedblleft#1\textquotedblright}% per " "
+\newcommand{\vrs}[1]{\textquoteleft#1\textquoteright}% per ' '
 
 \graphicspath{ {immagini/} {../../../shared/images/} }
 
@@ -33,18 +36,18 @@ citecolor=blue]{hyperref}
 \fancyhf{}
 % Intestazione standard
 \fancyhead[L]{NullPointers Group}
-\fancyhead[R]{Norme di Progetto}
+\fancyhead[R]{Glossario}
 \renewcommand{\headrulewidth}{0.4pt}
 % Piè di pagina
-\fancyfoot[C]{Pagina \thepage{} di \pageref{LastPage}}
+\fancyfoot[C]{Pagina \thepage{} di \pageref*{LastPage}}
 \renewcommand{\footrulewidth}{0.4pt}
 
 % --- Ridefinizione dello stile plain per gli indici ---
 \fancypagestyle{plain}{
   \fancyhf{}
   \fancyhead[L]{NullPointers Group}
-  \fancyhead[R]{Norme di Progetto}
-  \fancyfoot[C]{Pagina \thepage{} di \pageref{LastPage}}
+  \fancyhead[R]{Glossario}
+  \fancyfoot[C]{Pagina \thepage{} di \pageref*{LastPage}}
   \renewcommand{\headrulewidth}{0.4pt}
   \renewcommand{\footrulewidth}{0.4pt}
 }
@@ -52,9 +55,20 @@ citecolor=blue]{hyperref}
 % --- Solo piè di pagina per la prima pagina ---
 \fancypagestyle{firstpage}{
   \fancyhf{}
-  \fancyfoot[C]{Pagina \thepage{} di \pageref{LastPage}}
+  \fancyfoot[C]{Pagina \thepage{} di \pageref*{LastPage}}
   \renewcommand{\headrulewidth}{0pt}
   \renewcommand{\footrulewidth}{0.4pt}
+}
+
+% Stile per i termini del glossario
+\newcommand{\term}[1]{%
+	\par % chiude il paragrafo precedente
+	\vspace{1.2em} % spazio prima del termine
+	\begin{center}
+		\textbf{\large #1}
+	\end{center}
+	\vspace{0.4em} % piccolo spazio dopo il termine
+	\noindent % inizio della definizione senza rientro
 }
 
 %struttura

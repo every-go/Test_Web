@@ -7,8 +7,13 @@
 \usepackage{calc} % Sempre per le tabelle
 \usepackage{tocloft}
 \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
-\usepackage[hidelinks]{hyperref} % Per i collegamenti ipertestuali, ad esempio sulla table of contents
-\usepackage{xcolor} % Per colorare il testo
+\usepackage{xcolor}
+\usepackage[
+	colorlinks=true,
+	linkcolor=blue,
+	citecolor=blue,
+	urlcolor=blue
+]{hyperref}
 \usepackage{colortbl} % Per colorare le celle delle tabelle
 \usepackage{lipsum} % Per generare lorem ipsum
 \usepackage[normalem]{ulem} % Per sottolineare il testo
@@ -19,10 +24,16 @@
 \usepackage{lastpage} % Per contare il numero totale di pagine
 \usepackage{enumitem} 
 \usepackage{amssymb} %per personalizzare gli elenchi
+\usepackage[T1]{fontenc} %per {} come ""
+\usepackage{float} % Per l'opzione [H] nelle tabelle
+\usepackage{longtable}
+\usepackage[all]{hypcap}%per puntare ai titoli delle sezioni (titolo inizio finestra)
+\usepackage{amsmath}%per le formule nelle metriche
 
-\newcommand{\ulhref}[2]{\href{#1}{\underline{#2}}} % Sottolineatura
-\newcommand{\ulref}[1]{\uline{\ref{#1}}} % Sottolinea riferimenti a figure
 \setlength{\parindent}{0pt} % Nessun rientro dei paragrafi
+\newcommand{\vr}[1]{\textquotedblleft#1\textquotedblright}% per " "
+\newcommand{\vrs}[1]{\textquoteleft#1\textquoteright}% per ' 
+\definecolor{green}{HTML}{008080}
 
 \graphicspath{ {immagini/} {../../../shared/images/} }
 
@@ -34,7 +45,7 @@
 \fancyhead[R]{Norme di Progetto}
 \renewcommand{\headrulewidth}{0.4pt}
 % Piè di pagina
-\fancyfoot[C]{Pagina \thepage{} di \pageref{LastPage}}
+\fancyfoot[C]{Pagina \thepage{} di \pageref*{LastPage}}
 \renewcommand{\footrulewidth}{0.4pt}
 
 % --- Ridefinizione dello stile plain per gli indici ---
@@ -42,7 +53,7 @@
   \fancyhf{}
   \fancyhead[L]{NullPointers Group}
   \fancyhead[R]{Norme di Progetto}
-  \fancyfoot[C]{Pagina \thepage{} di \pageref{LastPage}}
+  \fancyfoot[C]{Pagina \thepage{} di \pageref*{LastPage}}
   \renewcommand{\headrulewidth}{0.4pt}
   \renewcommand{\footrulewidth}{0.4pt}
 }
@@ -50,7 +61,7 @@
 % --- Solo piè di pagina per la prima pagina ---
 \fancypagestyle{firstpage}{
   \fancyhf{}
-  \fancyfoot[C]{Pagina \thepage{} di \pageref{LastPage}}
+  \fancyfoot[C]{Pagina \thepage{} di \pageref*{LastPage}}
   \renewcommand{\headrulewidth}{0pt}
   \renewcommand{\footrulewidth}{0.4pt}
 }
@@ -78,6 +89,27 @@
 \setcounter{secnumdepth}{4}
 \setcounter{tocdepth}{4}
 
+% --- Creazione livello 5 (subsubsubsubsection) 
+\titleclass{\subsubsubsubsection}{straight}[\subsubsubsection]
+
+\newcounter{subsubsubsubsection}[subsubsubsection]
+\renewcommand{\thesubsubsubsubsection}{\thesubsubsubsection.\arabic{subsubsubsubsection}}
+
+\titleformat{\subsubsubsubsection}
+  {\normalfont\normalsize\bfseries}
+  {\thesubsubsubsubsection}{0.5em}{}
+
+\titlespacing*{\subsubsubsubsection}{0pt}{1ex}{1ex}
+
+\makeatletter
+\newcommand{\l@subsubsubsubsection}{\@dottedtocline{5}{10em}{4.5em}}
+\makeatother
+
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
+
+
+
 %struttura
 \begin{document}
 \thispagestyle{firstpage} % Copertina con solo piè di pagina
@@ -91,18 +123,24 @@
 %variabile prima dell'indice
 \input{content/modifiche}
 \newpage
-\hypersetup{linkcolor=black}
+
 
 % Indice generale
-\tableofcontents
+\renewcommand{\contentsname}{Indice}
+{
+	\hypersetup{linkcolor=black}
+	\tableofcontents
+}
+
 
 \newpage
 % Indice delle tabelle
-\listoftables
+\renewcommand{\listtablename}{Elenco delle Tabelle}
+{
+	\hypersetup{linkcolor=black}
+	\listoftables
+}
 
-\newpage
-% Indice delle immagini
-\listoffigures
 
 %parte variabile
 \newpage
@@ -116,6 +154,12 @@
 
 \newpage
 \input{content/processi_organizzativi}
+
+\newpage
+\input{content/standard_progetto}
+
+\newpage
+\input{content/metriche_qualita}
 
 %da continuare...
 
