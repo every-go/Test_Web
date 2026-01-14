@@ -57,8 +57,9 @@ def compile_tex_to_pdf(src_dir: Path = SRC_DIR, output_dir: Path = OUTPUT_DIR, m
                 cwd=str(tex_dir),
                 capture_output=True,
                 text=True,
-                encoding='latin-1',
+                encoding='utf-8'
             )
+
             if res.returncode != 0:
                 logger.warning(f"latexmk failed for {tex_file}: {res.stderr.strip()}")
                 continue
