@@ -5,35 +5,18 @@ import shutil
 import subprocess
 import logging
 from pathlib import Path
-from datetime import datetime
-from typing import Dict, Any, List, Tuple, Optional
-
-# Optional runtime type-checking with beartype. Disable by setting BEARTYPE_ENABLE=0 in the environment.
-try:
-    from beartype import beartype as _beartype
-except Exception:  # beartype not installed
-    def _beartype(func):
-        return func
-
-BEARTYPE_ENABLED = os.getenv("BEARTYPE_ENABLE", "1") != "0"
-
-def maybe_beartype(func):
-    """Return beartype-decorated function if enabled, otherwise original function."""
-    return _beartype(func) if BEARTYPE_ENABLED else func
+from typing import Dict, Any, List, Optional
 
 # Configuration
 INDEX_HTML_PATH = Path("index.html")
 SRC_DIR = Path("src")
 OUTPUT_DIR = Path("output")
-IGNORE_DIR = {Path("Candidatura")}
 SECTION_ORDER = ["PB", "RTB", "Candidatura", "Diario Di Bordo"]
 MAX_DEPTH = 2
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
-
-@maybe_beartype
 def cleanup_source_pdf(src_dir: Path = SRC_DIR) -> None:
     """Rimuove file generati temporanei nella sorgente (.pdf, .log, .aux, ...)."""
     patterns = (".pdf", ".lof", ".lot", ".log", ".aux", ".fls", ".out", ".fdb_latexmk", ".synctex.gz", ".toc", ".snm", ".nav")
@@ -45,8 +28,6 @@ def cleanup_source_pdf(src_dir: Path = SRC_DIR) -> None:
                 except Exception:
                     logger.debug(f"Could not remove {os.path.join(root, file)}")
 
-
-@maybe_beartype
 def compile_tex_to_pdf(
     src_dir: Path = SRC_DIR,
     output_dir: Path = OUTPUT_DIR,
@@ -120,9 +101,6 @@ def compile_tex_to_pdf(
 
     return pdf_to_tex_content
 
-
-
-@maybe_beartype
 def format_filename(filename: str, tex_content: str = "") -> str:
     """
     Format del nome file con prefissi e versione.
@@ -155,8 +133,6 @@ def format_filename(filename: str, tex_content: str = "") -> str:
 
     return name.replace("_", " ") + v
 
-
-@maybe_beartype
 def build_tree(
     path: Path,
     pdf_to_tex_content: Optional[Dict[Path, str]] = None,
@@ -203,9 +179,6 @@ def build_tree(
 
     return node
 
-
-
-@maybe_beartype
 def generate_html(node: Dict[str, Any], level: int = 2, indent: int = 0) -> str:
     html_lines: List[str] = []
     space = "    " * indent
@@ -230,8 +203,6 @@ def generate_html(node: Dict[str, Any], level: int = 2, indent: int = 0) -> str:
                 html_lines.append(f'{space}</section>')
     return "\n".join(html_lines)
 
-
-@maybe_beartype
 def update_index_html(
     index_path: Path = INDEX_HTML_PATH,
     output_dir: Path = OUTPUT_DIR,
