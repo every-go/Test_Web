@@ -1,19 +1,26 @@
-name: Build PDFs and Push
+name: Build PDFs and Deploy Pages
 
 on:
   push:
-    branches: [main]  # trigger diretto sul branch principale, puoi cambiare branch
+    branches: [main]
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  build-and-push:
+  build:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     container: ghcr.io/xu-cheng/texlive-full:latest
 
     steps:
-      - name: Checkout branch
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: Generate Glossario
         run: python3 .github/workflows/glossario.py
@@ -21,10 +28,17 @@ jobs:
       - name: Compile TeX and update index.html
         run: python3 .github/workflows/main.py
 
-      - name: Commit and Push PDFs
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add output/
-          git commit -m "Auto: PDFs e index aggiornati" || echo "Nothing to commit"
-          git push origin main
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
