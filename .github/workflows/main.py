@@ -31,20 +31,15 @@ def cleanup_source_pdf(src_dir: Path = SRC_DIR) -> None:
 def compile_tex_to_pdf(
     src_dir: Path = SRC_DIR,
     output_dir: Path = OUTPUT_DIR,
-    ignore_dir: set[Path] = IGNORE_DIR,
     max_depth: Optional[int] = MAX_DEPTH,
     latexmk_cmd: str = "latexmk",
 ) -> Dict[Path, str]:
     #Compila i .tex e copia i PDF in output, restituendo una mappa PDF -> table.tex
     output_dir.mkdir(parents=True, exist_ok=True)
-    
-    if (src_dir / "PB").exists():
-        ignore_dir.add(src_dir / "RTB")
+
 
     tex_files: List[Path] = []
     for tex_path in src_dir.rglob("*.tex"):
-        if any(p.name == ignored.name for p in tex_path.parents for ignored in ignore_dir):
-            continue
         try:
             with open(tex_path, "r", encoding="utf-8", errors="ignore") as f:
                 head = f.read(4096)
