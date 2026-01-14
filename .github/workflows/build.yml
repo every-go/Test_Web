@@ -8,7 +8,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write       # read → write per push
   pages: write
   id-token: write
 
@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true   # usa il GITHUB_TOKEN per push automatici
 
       - name: Generate Glossario
         run: python3 .github/workflows/glossario.py
@@ -27,15 +29,15 @@ jobs:
       - name: Compile TeX and update index.html
         run: python3 .github/workflows/main.py
 
-      # Se vuoi aggiornare index.html nel branch main:
+      # Commit index.html aggiornato nel main senza HTTPS esplicito
       - name: Commit updated index.html
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git add index.html
-          git commit -m "Aggiornamento index" || exit 0
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
+          git commit --allow-empty -m "Aggiornamento index" || exit 0
+          git push origin main
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
